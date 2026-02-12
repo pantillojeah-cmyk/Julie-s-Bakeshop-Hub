@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 35 30% 96%;
+    --foreground: 25 30% 12%;
+
+    --card: 36 33% 97%;
+    --card-foreground: 25 30% 12%;
+
+    --popover: 36 33% 97%;
+    --popover-foreground: 25 30% 12%;
+
+    --primary: 25 55% 28%;
+    --primary-foreground: 36 33% 97%;
+
+    --secondary: 35 25% 90%;
+    --secondary-foreground: 25 30% 18%;
+
+    --muted: 35 20% 92%;
+    --muted-foreground: 25 10% 46%;
+
+    --accent: 36 80% 55%;
+    --accent-foreground: 25 55% 12%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 20% 87%;
+    --input: 30 20% 87%;
+    --ring: 25 55% 28%;
+
+    --radius: 0.625rem;
+
+    --sidebar-background: 25 55% 28%;
+    --sidebar-foreground: 36 33% 97%;
+    --sidebar-primary: 36 80% 55%;
+    --sidebar-primary-foreground: 25 55% 12%;
+    --sidebar-accent: 25 45% 22%;
+    --sidebar-accent-foreground: 36 33% 97%;
+    --sidebar-border: 25 40% 35%;
+    --sidebar-ring: 36 80% 55%;
+
+    --success: 142 60% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 25 55% 12%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer utilities {
+  .bakery-gradient {
+    background: linear-gradient(135deg, hsl(25 55% 28%), hsl(25 45% 22%));
+  }
+  
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+  }
+}
