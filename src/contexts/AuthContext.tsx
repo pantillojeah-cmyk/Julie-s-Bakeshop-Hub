@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { User } from "@/types/inventory";
-import { mockUsers } from "@/data/mockData";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { User, loginUser } from "@/lib/api";
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string) => boolean;
+  login: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -18,21 +18,35 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = (username: string, password: string) => {
-    // Mock login: admin/admin or staff1/staff1
-    const found = mockUsers.find(u => u.username === username);
-    if (found && password === found.username) {
-      setUser(found);
-      return true;
+  useEffect(() => {
+    const savedUser = localStorage.getItem("jbh_user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
     }
-    return false;
+    setIsLoading(false);
+  }, []);
+
+  const login = async (username: string, password: string) => {
+    try {
+      const { user: foundUser } = await loginUser(username, password);
+      setUser(foundUser);
+      localStorage.setItem("jbh_user", JSON.stringify(foundUser));
+      return { ok: true };
+    } catch (err: any) {
+      console.error("Login failed:", err);
+      return { ok: false, error: err.message };
+    }
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("jbh_user");
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

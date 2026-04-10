@@ -1,19 +1,38 @@
 import { useState } from "react";
-import { mockProducts, mockTransactions } from "@/data/mockData";
+import { useQuery } from "@tanstack/react-query";
+import { getProducts, getTransactions, Product, Transaction } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Printer, Package, ArrowLeftRight, AlertTriangle } from "lucide-react";
+import { Printer, Package, ArrowLeftRight, AlertTriangle, Loader2 } from "lucide-react";
 
 type ReportType = "inventory" | "transactions" | "low-stock";
 
 const ReportsPage = () => {
   const [reportType, setReportType] = useState<ReportType>("inventory");
 
-  const handlePrint = () => window.print();
+  const { data: products = [], isLoading: productsLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+  });
 
-  const lowStock = mockProducts.filter(p => p.stock <= p.minStock);
+  const { data: transactions = [], isLoading: txLoading } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: getTransactions,
+  });
+
+  if (productsLoading || txLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const lowStock = products.filter(p => p.stock <= p.min_stock);
+
+  const handlePrint = () => window.print();
 
   return (
     <div className="space-y-4">
@@ -57,19 +76,19 @@ const ReportsPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockProducts.map(p => (
+                {products.map(p => (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.name}</TableCell>
                     <TableCell>{p.category}</TableCell>
                     <TableCell className="text-right">{p.stock} {p.unit}</TableCell>
-                    <TableCell className="text-right">₱{p.price.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">₱{Number(p.price).toFixed(2)}</TableCell>
                     <TableCell className="text-right">₱{(p.stock * p.price).toFixed(2)}</TableCell>
-                    <TableCell>{p.expiryDate}</TableCell>
+                    <TableCell>{new Date(p.expiry_date).toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}
                 <TableRow className="font-bold">
                   <TableCell colSpan={4} className="text-right">Total Inventory Value:</TableCell>
-                  <TableCell className="text-right">₱{mockProducts.reduce((s, p) => s + p.stock * p.price, 0).toFixed(2)}</TableCell>
+                  <TableCell className="text-right">₱{products.reduce((s, p) => s + p.stock * p.price, 0).toFixed(2)}</TableCell>
                   <TableCell />
                 </TableRow>
               </TableBody>
@@ -89,20 +108,25 @@ const ReportsPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockTransactions.map(t => (
+                {transactions.map(t => (
                   <TableRow key={t.id}>
-                    <TableCell>{t.date}</TableCell>
-                    <TableCell className="font-medium">{t.productName}</TableCell>
+                    <TableCell>{new Date(t.created_at).toLocaleString()}</TableCell>
+                    <TableCell className="font-medium">{t.product_name}</TableCell>
                     <TableCell>
                       <Badge variant={t.type === "stock-in" ? "default" : "secondary"}>
                         {t.type === "stock-in" ? "IN" : "OUT"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">{t.quantity}</TableCell>
-                    <TableCell>{t.performedBy}</TableCell>
-                    <TableCell className="text-muted-foreground">{t.notes}</TableCell>
+                    <TableCell>{t.performed_by}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{t.notes}</TableCell>
                   </TableRow>
                 ))}
+                {transactions.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No transactions available.</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           )}
@@ -124,10 +148,15 @@ const ReportsPage = () => {
                     <TableCell className="font-medium">{p.name}</TableCell>
                     <TableCell>{p.category}</TableCell>
                     <TableCell className="text-right">{p.stock} {p.unit}</TableCell>
-                    <TableCell className="text-right">{p.minStock}</TableCell>
-                    <TableCell className="text-right text-destructive font-medium">-{p.minStock - p.stock}</TableCell>
+                    <TableCell className="text-right">{p.min_stock}</TableCell>
+                    <TableCell className="text-right text-destructive font-medium">-{p.min_stock - p.stock}</TableCell>
                   </TableRow>
                 ))}
+                {lowStock.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No low stock items.</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           )}
