@@ -36,6 +36,8 @@ const DashboardPage = () => {
     return d >= now && d <= next7Days;
   });
 
+  const lowStockProducts = products.filter(p => p.stock <= p.min_stock);
+
   const recentTransactions = transactions.slice(0, 5);
 
   const statCards = [

@@ -9,15 +9,23 @@ import DashboardPage from "@/pages/DashboardPage";
 import ProductsPage from "@/pages/ProductsPage";
 import InventoryPage from "@/pages/InventoryPage";
 import SuppliersPage from "@/pages/SuppliersPage";
-import ReportsPage from "@/pages/ReportsPage";
+import UsersPage from "@/pages/UsersPage";
 import AppLayout from "@/components/AppLayout";
 import NotFound from "./pages/NotFound";
+import ReportsPage from "@/pages/ReportsPage";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
+  return <AppLayout>{children}</AppLayout>;
+};
+
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'admin') return <Navigate to="/dashboard" replace />;
   return <AppLayout>{children}</AppLayout>;
 };
 
@@ -31,6 +39,7 @@ const AppRoutes = () => {
       <Route path="/inventory" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
       <Route path="/suppliers" element={<ProtectedRoute><SuppliersPage /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
+      <Route path="/users" element={<AdminRoute><UsersPage /></AdminRoute>} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -1,6 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 import productsRouter from './routes/products.js';
 import suppliersRouter from './routes/suppliers.js';
@@ -39,9 +44,18 @@ app.use('/api/transactions', transactionsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/stats', statsRouter);
 
-// 404 fallback
-app.use((req, res) => {
+// Serve static frontend in production
+const distPath = path.join(__dirname, '../dist');
+app.use(express.static(distPath));
+
+// API 404 fallback
+app.use('/api', (req, res) => {
   res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
+});
+
+// React Router fallback for frontend navigation
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 // Error handler
@@ -54,7 +68,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+app.listen(PORT, '::', () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📦 Database: ${process.env.PG_DATABASE || 'IMS Julies_db'}`);
 });

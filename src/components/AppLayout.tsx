@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  LayoutDashboard, Package, ArrowLeftRight, Users, FileText, LogOut, Menu, X, CakeSlice
+  LayoutDashboard, Package, ArrowLeftRight, Users, FileText, LogOut, Menu, X
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ const navItems = [
   { to: "/inventory", label: "Inventory", icon: ArrowLeftRight },
   { to: "/suppliers", label: "Suppliers", icon: Users },
   { to: "/reports", label: "Reports", icon: FileText },
+  { to: "/users", label: "Users", icon: Users, adminOnly: true },
 ];
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
@@ -46,7 +47,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map(item => (
+          {navItems
+            .filter(item => !item.adminOnly || user?.role === 'admin')
+            .map(item => (
             <NavLink
               key={item.to}
               to={item.to}

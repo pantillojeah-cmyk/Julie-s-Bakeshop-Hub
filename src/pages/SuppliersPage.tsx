@@ -8,9 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Plus, Edit, Trash2, Search, Loader2 } from "lucide-react";
 
 const SuppliersPage = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -89,9 +92,11 @@ const SuppliersPage = () => {
           <Input placeholder="Search suppliers..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <Dialog open={dialogOpen} onOpenChange={o => { setDialogOpen(o); if (!o) setEditing(null); }}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />Add Supplier</Button>
-          </DialogTrigger>
+          {isAdmin && (
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4 mr-2" />Add Supplier</Button>
+            </DialogTrigger>
+          )}
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editing ? "Edit Supplier" : "Add Supplier"}</DialogTitle>
@@ -133,11 +138,13 @@ const SuppliersPage = () => {
                     <Button size="icon" variant="ghost" onClick={() => { setEditing(s); setDialogOpen(true); }}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" onClick={() => {
-                      if (confirm("Are you sure you want to delete this supplier?")) deleteMutation.mutate(s.id);
-                    }} disabled={deleteMutation.isPending}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    {isAdmin && (
+                      <Button size="icon" variant="ghost" onClick={() => {
+                        if (confirm("Are you sure you want to delete this supplier?")) deleteMutation.mutate(s.id);
+                      }} disabled={deleteMutation.isPending}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

@@ -75,15 +75,26 @@ router.post('/', async (req, res) => {
 
 // PUT update user
 router.put('/:id', async (req, res) => {
-  const { username, name, role } = req.body;
+  const { username, name, role, password } = req.body;
   try {
-    const { rows } = await pool.query(
-      `UPDATE users SET username=$1, name=$2, role=$3, updated_at=NOW()
-       WHERE id=$4 RETURNING id, username, name, role, updated_at`,
-      [username, name, role, req.params.id]
-    );
-    if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
-    res.json(rows[0]);
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const { rows } = await pool.query(
+        `UPDATE users SET username=$1, name=$2, role=$3, password_hash=$4, updated_at=NOW()
+         WHERE id=$5 RETURNING id, username, name, role, updated_at`,
+        [username, name, role, hashedPassword, req.params.id]
+      );
+      if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+      res.json(rows[0]);
+    } else {
+      const { rows } = await pool.query(
+        `UPDATE users SET username=$1, name=$2, role=$3, updated_at=NOW()
+         WHERE id=$4 RETURNING id, username, name, role, updated_at`,
+        [username, name, role, req.params.id]
+      );
+      if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+      res.json(rows[0]);
+    }
   } catch (err) {
     console.error('PUT /api/users/:id error:', err.message);
     res.status(500).json({ error: err.message });

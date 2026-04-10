@@ -7,15 +7,20 @@
  *   import { getProducts, createProduct } from '@/lib/api';
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const BASE_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:3001');
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${BASE_URL}${path}`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
   try {
     const res = await fetch(url, {
+      signal: controller.signal,
       headers: { 'Content-Type': 'application/json', ...options?.headers },
       ...options,
     });
+    clearTimeout(timeoutId);
     if (!res.ok) {
       const errorBody = await res.json().catch(() => ({}));
       console.error(`API Error [${res.status}] ${url}:`, errorBody);
@@ -23,8 +28,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     }
     return res.json() as Promise<T>;
   } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error("Request timed out. The server might be busy or unreachable. Please try again.");
+    }
     if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
-      throw new Error("Database server unreachable. Please make sure the backend is running (npm run dev:server).");
+      throw new Error("Database server unreachable. Please make sure the backend is running (npm run dev:all).");
     }
     throw err;
   }
@@ -151,6 +160,9 @@ export const createUser = (data: Omit<User, 'id' | 'created_at' | 'updated_at'> 
 
 export const updateUser = (id: string, data: Partial<Omit<User, 'id' | 'created_at' | 'updated_at'>>) =>
   request<User>(`/api/users/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+
+export const deleteUser = (id: string) =>
+  request<{ message: string }>(`/api/users/${id}`, { method: 'DELETE' });
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 
