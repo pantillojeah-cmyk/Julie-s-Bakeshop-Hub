@@ -1,34 +1,33 @@
 import pg from 'pg';
-const { Client } = pg;
+import dotenv from 'dotenv';
+dotenv.config();
 
-const users = ['postgres', 'admin', 'IMS Julies_db', 'jeahjeah', 'Julie'];
-const passwords = ['jeahjeah77', 'jeahjeah', 'jeahjeah77 ', ' jeahjeah77', 'Jeahjeah77', 'postgres', 'admin', '123456', 'password'];
+const { Pool } = pg;
 
-async function testConnection() {
-  for (const pw of passwords) {
-    for (const user of users) {
-      console.log(`Testing user: "${user}" with password: "${pw}"...`);
-      const client = new Client({
-        host: '127.0.0.1',
-        port: 5432,
-        user,
-        password: pw,
-        database: 'postgres',
-        connectionTimeoutMillis: 500,
-      });
-
-      try {
-        await client.connect();
-        console.log(`✅ SUCCESS! User "${user}" connected with password "${pw}"`);
-        await client.end();
-        return;
-      } catch (err) {
-        // Only log if it's NOT a password error (to keep logs clean) or log everything if needed
-        // console.log(`❌ Failed: ${err.message}`);
+const pool = process.env.DATABASE_URL
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false
       }
-    }
-  }
-  console.log('Finished testing all combinations.');
-}
+    })
+  : new Pool({
+      host: process.env.PG_HOST || '127.0.0.1',
+      port: parseInt(process.env.PG_PORT || '5432'),
+      user: process.env.PG_USER || 'postgres',
+      password: process.env.PG_PASSWORD,
+      database: process.env.PG_DATABASE || 'IMS Julies_db',
+    });
 
-testConnection();
+console.log('Using URL:', process.env.DATABASE_URL ? 'yes' : 'no');
+
+pool.connect()
+  .then(client => {
+    console.log('✅ Success!');
+    client.release();
+    process.exit(0);
+  })
+  .catch(err => {
+    console.error('❌ Error:', err.message);
+    process.exit(1);
+  });
