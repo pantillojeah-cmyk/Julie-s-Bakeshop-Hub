@@ -1,6 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { getStats, getProducts, getRawMaterials, getTransactions } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, AlertTriangle, Clock, ArrowLeftRight, Loader2 } from "lucide-react";
+import { Package, AlertTriangle, Clock, ArrowLeftRight, Loader2, Wheat } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const DashboardPage = () => {
@@ -58,6 +59,7 @@ const DashboardPage = () => {
 
   const statCards = [
     { label: "Total Products", value: stats?.totalProducts || 0, icon: Package, color: "text-primary" },
+    { label: "Total Ingredients", value: stats?.totalIngredients || 0, icon: Wheat, color: "text-amber-600" },
     { label: "Low Stock Items", value: stats?.lowStockItems || 0, icon: AlertTriangle, color: "text-destructive" },
     { label: "Expired Items", value: stats?.expiredItems || 0, icon: AlertTriangle, color: "text-red-500" },
     { label: "Expiring Soon", value: stats?.expiringSoon || 0, icon: Clock, color: "text-amber-500" },
@@ -66,7 +68,7 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {statCards.map(s => (
           <Card key={s.label} className="card-hover">
             <CardContent className="flex items-center gap-4 p-5">
