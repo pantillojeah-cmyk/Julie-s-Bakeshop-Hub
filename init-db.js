@@ -61,9 +61,23 @@ async function run() {
         updated_at TIMESTAMP DEFAULT NOW()
       );
 
+      CREATE TABLE IF NOT EXISTS raw_materials (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR NOT NULL,
+        category VARCHAR,
+        unit VARCHAR,
+        stock INTEGER DEFAULT 0,
+        min_stock INTEGER DEFAULT 1,
+        expiry_date DATE,
+        supplier_id UUID REFERENCES suppliers(id) ON DELETE SET NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+
       CREATE TABLE IF NOT EXISTS transactions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        product_id UUID REFERENCES products(id) ON DELETE CASCADE NOT NULL,
+        product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+        raw_material_id UUID REFERENCES raw_materials(id) ON DELETE CASCADE,
         type VARCHAR NOT NULL,
         quantity INTEGER NOT NULL,
         performed_by UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,

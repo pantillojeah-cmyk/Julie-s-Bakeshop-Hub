@@ -101,4 +101,21 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// DELETE user
+router.delete('/:id', async (req, res) => {
+  try {
+    // Safety: prevent deleting the protected admin account
+    const { rows: check } = await pool.query('SELECT username FROM users WHERE id=$1', [req.params.id]);
+    if (check.length === 0) return res.status(404).json({ error: 'User not found' });
+    if (check[0].username === 'admin') return res.status(403).json({ error: 'Cannot delete the admin account' });
+
+    await pool.query('DELETE FROM users WHERE id=$1', [req.params.id]);
+    res.json({ message: 'User deleted successfully' });
+  } catch (err) {
+    console.error('DELETE /api/users/:id error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
+

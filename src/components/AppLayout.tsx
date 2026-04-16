@@ -35,7 +35,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       `}>
         <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
           <div className="w-10 h-10 rounded-full overflow-hidden border border-sidebar-primary/30">
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+            <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <h1 className="text-lg font-bold text-sidebar-foreground leading-tight">Julie's Bakeshop</h1>

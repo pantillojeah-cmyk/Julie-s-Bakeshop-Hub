@@ -30,8 +30,8 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <Card className="w-full max-w-sm shadow-lg border-primary/10">
         <CardHeader className="text-center pb-2">
-          <div className="mx-auto mb-4 w-24 h-24 rounded-full overflow-hidden border-2 border-accent shadow-md">
-            <img src="/logo.png" alt="Julie's Bakeshop Logo" className="w-full h-full object-cover" />
+          <div className="mx-auto mb-4 w-36 h-36 rounded-2xl overflow-hidden shadow-md">
+            <img src="/logo-login.jpg" alt="Julie's Bakeshop Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Julie's Bakeshop</h1>
           <p className="text-sm text-muted-foreground mt-1">Pitogo Branch — Inventory System</p>
