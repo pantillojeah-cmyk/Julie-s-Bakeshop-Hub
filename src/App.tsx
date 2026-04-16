@@ -10,6 +10,7 @@ import ProductsPage from "@/pages/ProductsPage";
 import InventoryPage from "@/pages/InventoryPage";
 import SuppliersPage from "@/pages/SuppliersPage";
 import UsersPage from "@/pages/UsersPage";
+import RawMaterialsPage from "@/pages/RawMaterialsPage";
 import AppLayout from "@/components/AppLayout";
 import NotFound from "./pages/NotFound";
 import ReportsPage from "@/pages/ReportsPage";
@@ -36,6 +37,7 @@ const AppRoutes = () => {
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
       <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="/products" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
+      <Route path="/raw-materials" element={<ProtectedRoute><RawMaterialsPage /></ProtectedRoute>} />
       <Route path="/inventory" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
       <Route path="/suppliers" element={<ProtectedRoute><SuppliersPage /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />

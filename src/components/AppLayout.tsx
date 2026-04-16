@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  LayoutDashboard, Package, ArrowLeftRight, Users, FileText, LogOut, Menu, X
+  LayoutDashboard, Package, ArrowLeftRight, Users, FileText, LogOut, Menu, X, Wheat
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/products", label: "Products", icon: Package },
+  { to: "/raw-materials", label: "Raw Materials", icon: Wheat },
   { to: "/inventory", label: "Inventory", icon: ArrowLeftRight },
   { to: "/suppliers", label: "Suppliers", icon: Users },
   { to: "/reports", label: "Reports", icon: FileText },

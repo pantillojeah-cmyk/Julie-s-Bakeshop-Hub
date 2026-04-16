@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getProducts, getTransactions, Product, Transaction } from "@/lib/api";
+import { getProducts, getRawMaterials, getTransactions, Product, RawMaterial, Transaction } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,12 +17,17 @@ const ReportsPage = () => {
     queryFn: getProducts,
   });
 
+  const { data: rawMaterials = [], isLoading: rawLoading } = useQuery({
+    queryKey: ["raw_materials"],
+    queryFn: getRawMaterials,
+  });
+
   const { data: transactions = [], isLoading: txLoading } = useQuery({
     queryKey: ["transactions"],
     queryFn: getTransactions,
   });
 
-  if (productsLoading || txLoading) {
+  if (productsLoading || rawLoading || txLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -30,7 +35,8 @@ const ReportsPage = () => {
     );
   }
 
-  const lowStock = products.filter(p => p.stock <= p.min_stock);
+  const lowStockProducts = products.filter(p => p.stock <= p.min_stock);
+  const lowStockIngredients = rawMaterials.filter(rm => rm.stock <= rm.min_stock);
 
   const handlePrint = () => window.print();
 
@@ -79,11 +85,21 @@ const ReportsPage = () => {
                 {products.map(p => (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.name}</TableCell>
-                    <TableCell>{p.category}</TableCell>
+                    <TableCell>{p.category} (Product)</TableCell>
                     <TableCell className="text-right">{p.stock} {p.unit}</TableCell>
                     <TableCell className="text-right">₱{Number(p.price).toFixed(2)}</TableCell>
                     <TableCell className="text-right">₱{(p.stock * p.price).toFixed(2)}</TableCell>
                     <TableCell>{new Date(p.expiry_date).toLocaleDateString()}</TableCell>
+                  </TableRow>
+                ))}
+                {rawMaterials.map(rm => (
+                  <TableRow key={rm.id}>
+                    <TableCell className="font-medium">{rm.name}</TableCell>
+                    <TableCell>{rm.category} (Ingredient)</TableCell>
+                    <TableCell className="text-right">{rm.stock} {rm.unit}</TableCell>
+                    <TableCell className="text-right">N/A</TableCell>
+                    <TableCell className="text-right">N/A</TableCell>
+                    <TableCell>{new Date(rm.expiry_date).toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}
                 <TableRow className="font-bold">
@@ -111,7 +127,7 @@ const ReportsPage = () => {
                 {transactions.map(t => (
                   <TableRow key={t.id}>
                     <TableCell>{new Date(t.created_at).toLocaleString()}</TableCell>
-                    <TableCell className="font-medium">{t.product_name}</TableCell>
+                    <TableCell className="font-medium">{t.product_name || t.raw_material_name}</TableCell>
                     <TableCell>
                       <Badge variant={t.type === "stock-in" ? "default" : "secondary"}>
                         {t.type === "stock-in" ? "IN" : "OUT"}
@@ -143,16 +159,25 @@ const ReportsPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {lowStock.map(p => (
+                {lowStockProducts.map(p => (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.name}</TableCell>
-                    <TableCell>{p.category}</TableCell>
+                    <TableCell>{p.category} (Product)</TableCell>
                     <TableCell className="text-right">{p.stock} {p.unit}</TableCell>
                     <TableCell className="text-right">{p.min_stock}</TableCell>
                     <TableCell className="text-right text-destructive font-medium">-{p.min_stock - p.stock}</TableCell>
                   </TableRow>
                 ))}
-                {lowStock.length === 0 && (
+                {lowStockIngredients.map(rm => (
+                  <TableRow key={rm.id}>
+                    <TableCell className="font-medium">{rm.name}</TableCell>
+                    <TableCell>{rm.category} (Ingredient)</TableCell>
+                    <TableCell className="text-right">{rm.stock} {rm.unit}</TableCell>
+                    <TableCell className="text-right">{rm.min_stock}</TableCell>
+                    <TableCell className="text-right text-destructive font-medium">-{rm.min_stock - rm.stock}</TableCell>
+                  </TableRow>
+                ))}
+                {lowStockProducts.length === 0 && lowStockIngredients.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No low stock items.</TableCell>
                   </TableRow>

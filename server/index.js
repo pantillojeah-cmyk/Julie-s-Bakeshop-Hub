@@ -12,6 +12,7 @@ import suppliersRouter from './routes/suppliers.js';
 import transactionsRouter from './routes/transactions.js';
 import usersRouter from './routes/users.js';
 import statsRouter from './routes/stats.js';
+import rawMaterialsRouter from './routes/raw_materials.js';
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use('/api/suppliers', suppliersRouter);
 app.use('/api/transactions', transactionsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/stats', statsRouter);
+app.use('/api/raw-materials', rawMaterialsRouter);
 
 // Serve static frontend in production
 const distPath = path.join(__dirname, '../dist');

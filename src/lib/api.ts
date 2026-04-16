@@ -66,15 +66,31 @@ export interface Supplier {
   updated_at: string;
 }
 
+export interface RawMaterial {
+  id: string;
+  name: string;
+  category: string;
+  unit: string;
+  stock: number;
+  min_stock: number;
+  expiry_date: string;
+  supplier_id?: string | null;
+  supplier_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Transaction {
   id: string;
-  product_id: string;
+  product_id?: string;
+  raw_material_id?: string;
   type: 'stock-in' | 'stock-out';
   quantity: number;
   performed_by: string;
   notes: string | null;
   created_at: string; // This is the UTC date from server
   product_name?: string;
+  raw_material_name?: string;
   product_category?: string;
   performed_by_name?: string;
 }
@@ -113,6 +129,23 @@ export const updateProduct = (id: string, data: Partial<Omit<Product, 'id' | 'cr
 export const deleteProduct = (id: string) =>
   request<{ message: string }>(`/api/products/${id}`, { method: 'DELETE' });
 
+// ─── Raw Materials ────────────────────────────────────────────────────────────
+
+export const getRawMaterials = () =>
+  request<RawMaterial[]>('/api/raw-materials');
+
+export const getRawMaterial = (id: string) =>
+  request<RawMaterial>(`/api/raw-materials/${id}`);
+
+export const createRawMaterial = (data: Omit<RawMaterial, 'id' | 'created_at' | 'updated_at' | 'supplier_name'>) =>
+  request<RawMaterial>('/api/raw-materials', { method: 'POST', body: JSON.stringify(data) });
+
+export const updateRawMaterial = (id: string, data: Partial<Omit<RawMaterial, 'id' | 'created_at' | 'updated_at' | 'supplier_name'>>) =>
+  request<RawMaterial>(`/api/raw-materials/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+
+export const deleteRawMaterial = (id: string) =>
+  request<{ message: string }>(`/api/raw-materials/${id}`, { method: 'DELETE' });
+
 // ─── Suppliers ────────────────────────────────────────────────────────────────
 
 export const getSuppliers = () =>
@@ -141,7 +174,7 @@ export const getStats = () =>
 export const getProductTransactions = (productId: string) =>
   request<Transaction[]>(`/api/transactions/product/${productId}`);
 
-export const createTransaction = (data: Pick<Transaction, 'product_id' | 'type' | 'quantity' | 'performed_by' | 'notes'>) =>
+export const createTransaction = (data: Pick<Transaction, 'product_id' | 'raw_material_id' | 'type' | 'quantity' | 'performed_by' | 'notes'>) =>
   request<Transaction>('/api/transactions', { method: 'POST', body: JSON.stringify(data) });
 
 // ─── Users ────────────────────────────────────────────────────────────────────
